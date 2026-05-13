@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBR EdTech - Night Train at Deoli Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #ffffff;
+            --text-dark: #0f172a; --text-light: #f8fafc; --text-muted: #64748b;
+            --accent-blue: #2563eb; --accent-green: #16a34a; --accent-gold: #f59e0b; --accent-red: #dc2626;
+            --border-color: #e2e8f0; --story-theme: #6d28d9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Noto Sans Bengali', sans-serif; background: var(--bg-primary); color: var(--text-light); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+
+        .test-container { width: 100%; max-width: 700px; background: var(--bg-secondary); border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; position: relative; }
+        
+        /* Header */
+        .test-header { background: linear-gradient(135deg, var(--story-theme), #4c1d95); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .test-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .header-logo { height: 35px; border-radius: 50%; }
+        .timer { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 8px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .timer.warning { color: var(--accent-red); animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        /* Sections */
+        .section { display: none; padding: 30px; }
+        .section.active { display: block; }
+
+        /* Landing Page */
+        .landing-header { text-align: center; margin-bottom: 30px; }
+        .landing-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 3px solid var(--accent-gold); box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+        .landing-header h1 { font-size: 1.6rem; margin-bottom: 5px; background: linear-gradient(90deg, var(--accent-gold), #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .landing-header h2 { font-size: 1.1rem; color: var(--text-light); margin-bottom: 10px; }
+        .landing-header p { color: var(--text-muted); font-size: 0.85rem; }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, opacity 0.2s; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-start { background: var(--story-theme); color: white; font-size: 1.1rem; }
+        .btn-next { background: var(--story-theme); color: white; margin-top: 25px; font-size: 1.1rem; }
+        .btn-submit { background: var(--accent-red); color: white; margin-top: 25px; font-size: 1.1rem; }
+        .btn-review { background: var(--accent-gold); color: var(--bg-primary); margin-top: 15px; font-size: 1.1rem; }
+
+        /* Quiz Area */
+        .progress-bar { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; margin-bottom: 25px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--story-theme); transition: width 0.3s ease; }
+        
+        .question-card { background: var(--bg-card); color: var(--text-dark); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; }
+        .question-card.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .q-meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .q-text { font-size: 1.1rem; font-weight: 700; line-height: 1.5; margin-bottom: 20px; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .option-btn { width: 100%; text-align: left; background: #f8fafc; border: 2px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 500; color: var(--text-dark); transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+        .option-btn:hover { border-color: var(--story-theme); background: #f5f3ff; }
+        .option-btn.selected { border-color: var(--story-theme); background: #ede9fe; color: var(--story-theme); }
+        
+        /* Review Specific Styles */
+        .option-btn.correct-answer { border-color: var(--accent-green); background: #dcfce7; color: var(--accent-green); }
+        .option-btn.wrong-answer { border-color: var(--accent-red); background: #fee2e2; color: var(--accent-red); text-decoration: line-through; }
+        .review-status { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
+        .status-correct { background: #dcfce7; color: var(--accent-green); }
+        .status-wrong { background: #fee2e2; color: var(--accent-red); }
+        .status-skipped { background: #e2e8f0; color: var(--text-muted); }
+
+        .circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s; }
+        .selected .circle { border-color: var(--story-theme); background: var(--story-theme); color: white; }
+        .correct-answer .circle { border-color: var(--accent-green); background: var(--accent-green); color: white; }
+        .wrong-answer .circle { border-color: var(--accent-red); background: var(--accent-red); color: white; }
+
+        /* Result Area */
+        .result-container { text-align: center; padding: 20px 0; }
+        .result-score { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, var(--story-theme), var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
+        .result-rank { font-size: 1.3rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 30px; background: rgba(245,158,11,0.1); display: inline-block; padding: 8px 25px; border-radius: 30px; }
+        .analysis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; text-align: center; }
+        .analysis-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; }
+        .analysis-num { font-size: 1.5rem; font-weight: 700; }
+        .analysis-label { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Watermark */
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 5rem; font-weight: 800; color: rgba(255,255,255,0.03); pointer-events: none; z-index: 0; white-space: nowrap; font-family: 'Inter', sans-serif; }
+
+    </style>
+</head>
+<body>
+
+    <div class="test-container">
+        <div class="watermark">SBR EdTech</div>
+        
+        <!-- Landing Section -->
+        <div id="landing-section" class="section active">
+            <div class="test-header" style="border-radius: 0 0 16px 16px; margin: -30px -30px 20px -30px; width: calc(100% + 60px);">
+                <div class="test-title"><img src="https://z-cdn-media.chatglm.cn/files/b0c2b525-a27a-4bab-822f-e82953d8357c.jpg?auth_key=1878630915-03ac61a908d94bcd97f91275486ae323-0-4b3401b2f25acd85d7c5cf64d0427c73" alt="SBR" class="header-logo"> English Quiz</div>
+                <div style="background:rgba(0,0,0,0.2); padding:5px 10px; border-radius:5px; font-size:0.8rem;">Q81 - Q100</div>
+            </div>
+
+            <div class="landing-header">
+                <img src="https://z-cdn-media.chatglm.cn/files/b0c2b525-a27a-4bab-822f-e82953d8357c.jpg?auth_key=1878630915-03ac61a908d94bcd97f91275486ae323-0-4b3401b2f25acd85d7c5cf64d0427c73" alt="SBR EdTech" class="landing-logo">
+                <h2>Night Train at Deoli</h2>
+                <h1>Ruskin Bond Smart Quiz</h1>
+                <p>20 MCQs | 10 Minutes | Review Answers at End</p>
+            </div>
+
+            <button class="btn btn-start" onclick="startTest()"><i class="fas fa-play"></i> Start Mock Test</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section">
+            <div class="test-header">
+                <div class="test-title"><img src="https://z-cdn-media.chatglm.cn/files/b0c2b525-a27a-4bab-822f-e82953d8357c.jpg?auth_key=1878630915-03ac61a908d94bcd97f91275486ae323-0-4b3401b2f25acd85d7c5cf64d0427c73" alt="SBR" class="header-logo"> Mock Test</div>
+                <div class="timer" id="timer"><i class="fas fa-clock"></i> <span id="time-left">10:00</span></div>
+            </div>
+
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            
+            <div id="questions-container"></div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-section" class="section">
+            <div class="result-container">
+                <i class="fas fa-award" style="font-size:4rem; color:var(--story-theme);"></i>
+                <h2>Quiz Completed!</h2>
+                <div class="result-score" id="final-score">0/20</div>
+                <div class="result-rank" id="final-rank">Rank: Calculating...</div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-box"><div class="analysis-num" style="color:var(--accent-green);" id="correct-count">0</div><div class="analysis-label">Correct</div></div>
+                    <div class="analysis-box"><div class="analysis-num" style="color:var(--accent-red);" id="wrong-count">0</div><div class="analysis-label">Wrong</div></div>
+                    <div class="analysis-box"><div class="analysis-num" style="color:var(--text-muted);" id="skipped-count">0</div><div class="analysis-label">Skipped</div></div>
+                </div>
+                
+                <button class="btn btn-review" onclick="reviewAnswers()"><i class="fas fa-search"></i> Review Correct & Wrong Answers</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Question Bank ---
+        const questions = [
+            { q: "81. Why did the narrator leave for Dehra earlier than usual?", options: ["(a) illness", "(b) urgent business", "(c) meet grandmother", "(d) meet the girl"], correct: 3 },
+            { q: "82. The narrator was anxious and nervous because —", options: ["(a) what to tell girl", "(b) she won't recognize him", "(c) might not find her", "(d) train won't stop"], correct: 2 },
+            { q: "83. The narrator was determined not to stand helplessly regarding —", options: ["(a) his feelings", "(b) his possessions", "(c) his anger", "(d) his problems"], correct: 0 },
+            { q: "84. The narrator was disappointed as —", options: ["(a) girl not at platform", "(b) train didn't stop", "(c) crowded station", "(d) girl refused talk"], correct: 0 },
+            { q: "85. What does 'foreboding' mean?", options: ["(a) dreadful apprehension", "(b) cheerful", "(c) hopeful", "(d) auspicious"], correct: 0 },
+            { q: "86. Why did he run to the station-master?", options: ["(a) know about town", "(b) enquire about the girl", "(c) train timings", "(d) tea stall owner"], correct: 1 },
+            { q: "87. Whom does 'you' refer to in the question about the girl?", options: ["(a) narrator", "(b) reader", "(c) fruit vendor", "(d) station-master"], correct: 3 },
+            { q: "88. What did the station-master suggest?", options: ["(a) get on train", "(b) ask tea owner", "(c) stay at Deoli", "(d) none"], correct: 0 },
+            { q: "89. Over the railings, the narrator saw —", options: ["(a) dusty road", "(b) mango tree/jungle road", "(c) garden", "(d) small town"], correct: 1 },
+            { q: "90. As the train rushed through the forest, the narrator —", options: ["(a) enjoyed beauty", "(b) started brooding", "(c) talked to others", "(d) slept"], correct: 1 },
+            { q: "91. The narrator met the girl —", options: ["(a) once", "(b) twice", "(c) never", "(d) more than twice"], correct: 1 },
+            { q: "92. What did the narrator know about the girl?", options: ["(a) everything", "(b) her name", "(c) nothing", "(d) where she lived"], correct: 2 },
+            { q: "93. The grandmother was not pleased because —", options: ["(a) he talked of girl", "(b) no gifts", "(c) stayed too long", "(d) stayed only two weeks"], correct: 3 },
+            { q: "94. The narrator could not stay long as —", options: ["(a) unhappy", "(b) restless/ill-at-ease", "(c) missed parents", "(d) exams"], correct: 1 },
+            { q: "95. 'Ill-at-ease' means to feel —", options: ["(a) happy", "(b) sick", "(c) uncomfortable", "(d) sad"], correct: 2 },
+            { q: "96. He took a train back to the plains to —", options: ["(a) leave grandma", "(b) ask station-master more questions", "(c) stay at Deoli", "(d) hostel"], correct: 1 },
+            { q: "97. The previous station-master —", options: ["(a) was transferred", "(b) was ill", "(c) left job", "(d) went missing"], correct: 0 },
+            { q: "98. The new station-master knew nothing about —", options: ["(a) town", "(b) the girl", "(c) old master", "(d) none"], correct: 1 },
+            { q: "99. After talking to the new master, the narrator —", options: ["(a) got on train", "(b) looked over railings", "(c) talked to girl", "(d) talked to tea owner"], correct: 1 },
+            { q: "100. The tea stall owner was a —", options: ["(a) tall man", "(b) fat man", "(c) small/wrinkled man", "(d) frail man"], correct: 2 }
+        ];
+
+        let userAnswers = new Array(questions.length).fill(null);
+        let currentQuestionIndex = 0;
+        let timeLeft = 600; 
+        let timerInterval;
+
+        function startTest() {
+            document.getElementById('landing-section').classList.remove('active');
+            document.getElementById('quiz-section').classList.add('active');
+            renderQuestions();
+            showQuestion(0);
+            startTimer();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            questions.forEach((q, index) => {
+                const isLast = index === questions.length - 1;
+                container.innerHTML += `
+                    <div class="question-card" id="q-card-${index}">
+                        <div class="q-meta">
+                            <span>Question ${index + 1} of ${questions.length}</span>
+                            <span id="status-${index}" style="color:var(--story-theme);"></span>
+                        </div>
+                        <div class="q-text">${q.q}</div>
+                        <div class="options-grid" id="opts-${index}">
+                            ${q.options.map((opt, i) => `
+                                <button class="option-btn" id="q${index}-opt${i}" onclick="selectOption(${index}, ${i})">
+                                    <span class="circle">${String.fromCharCode(65 + i)}</span> ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                        ${isLast ? 
+                            `<button class="btn btn-submit" onclick="submitTest()"><i class="fas fa-paper-plane"></i> Submit Quiz</button>` : 
+                            `<button class="btn btn-next" onclick="nextQuestion()">Next Question <i class="fas fa-arrow-right"></i></button>`
+                        }
+                    </div>
+                `;
+            });
+            updateProgress();
+        }
+
+        function showQuestion(index) {
+            document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(`q-card-${index}`).classList.add('active');
+            currentQuestionIndex = index;
+        }
+
+        function nextQuestion() {
+            if(currentQuestionIndex < questions.length - 1) { showQuestion(currentQuestionIndex + 1); }
+        }
+
+        function selectOption(qIndex, optIndex) {
+            userAnswers[qIndex] = optIndex;
+            for(let i=0; i<4; i++) { document.getElementById(`q${qIndex}-opt${i}`).classList.remove('selected'); }
+            document.getElementById(`q${qIndex}-opt${optIndex}`).classList.add('selected');
+            document.getElementById(`status-${qIndex}`).innerText = "Answered";
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const answered = userAnswers.filter(ans => ans !== null).length;
+            const progress = (answered / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                if(timeLeft <= 0) { clearInterval(timerInterval); submitTest(); return; }
+                const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+                document.getElementById('time-left').innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+                if(timeLeft < 120) { document.getElementById('timer').classList.add('warning'); }
+            }, 1000);
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let correct = 0, wrong = 0, skipped = 0;
+
+            questions.forEach((q, index) => {
+                const userAns = userAnswers[index];
+                if(userAns === null) skipped++;
+                else if(userAns === q.correct) correct++;
+                else wrong++;
+            });
+
+            const score = correct;
+            const rank = calculateRank(score);
+
+            document.getElementById('quiz-section').classList.remove('active');
+            document.getElementById('result-section').classList.add('active');
+
+            document.getElementById('final-score').innerText = `${score} / ${questions.length}`;
+            document.getElementById('final-rank').innerText = `All India Rank: ${rank}`;
+            document.getElementById('correct-count').innerText = correct;
+            document.getElementById('wrong-count').innerText = wrong;
+            document.getElementById('skipped-count').innerText = skipped;
+        }
+
+        function calculateRank(score) {
+            const totalStudents = 15420;
+            const percentile = (score / questions.length) * 100;
+            const rank = Math.max(1, Math.floor(totalStudents - (totalStudents * (percentile / 100)) + Math.random() * 20));
+            if(percentile === 100) return 1;
+            return rank;
+        }
+
+        // --- ANSWER REVIEW FUNCTION ---
+        function reviewAnswers() {
+            // Hide Result Section and show Quiz Section in Review Mode
+            document.getElementById('result-section').classList.remove('active');
+            document.getElementById('quiz-section').classList.add('active');
+            
+            // Hide Timer & Change Header
+            document.getElementById('timer').style.display = 'none';
+
+            // Remove Next/Submit buttons
+            document.querySelectorAll('.btn-next, .btn-submit').forEach(btn => btn.style.display = 'none');
+
+            // Show all questions
+            document.querySelectorAll('.question-card').forEach(card => card.classList.add('active'));
+
+            // Apply correct/wrong styling
+            questions.forEach((q, index) => {
+                const userAns = userAnswers[index];
+                const statusEl = document.getElementById(`status-${index}`);
+                
+                // Disable clicking
+                const opts = document.getElementById(`opts-${index}`);
+                opts.querySelectorAll('.option-btn').forEach(btn => { btn.style.pointerEvents = 'none'; });
+
+                // Highlight correct answer
+                document.getElementById(`q${index}-opt${q.correct}`).classList.add('correct-answer');
+
+                if(userAns === null) {
+                    statusEl.innerHTML = `<span class="review-status status-skipped">Skipped</span>`;
+                } else if(userAns === q.correct) {
+                    statusEl.innerHTML = `<span class="review-status status-correct"><i class="fas fa-check"></i> Correct</span>`;
+                    document.getElementById(`q${index}-opt${userAns}`).classList.remove('selected');
+                } else {
+                    statusEl.innerHTML = `<span class="review-status status-wrong"><i class="fas fa-times"></i> Wrong</span>`;
+                    document.getElementById(`q${index}-opt${userAns}`).classList.remove('selected');
+                    document.getElementById(`q${index}-opt${userAns}`).classList.add('wrong-answer');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
